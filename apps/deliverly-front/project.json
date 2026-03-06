@@ -1,0 +1,38 @@
+{
+  "name": "deliverly-front",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/deliverly-front/src",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/deliverly-front",
+        "index": "apps/deliverly-front/src/index.html",
+        "main": "apps/deliverly-front/src/main.tsx",
+        "tsConfig": "apps/deliverly-front/tsconfig.app.json",
+        "assets": ["apps/deliverly-front/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspectData": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "deliverly-front:build"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "deliverly-front:build:production"
+        }
+      }
+    }
+  }
+}

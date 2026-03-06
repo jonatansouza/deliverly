@@ -86,7 +86,7 @@ services:
   # --- Deliverly Backend: NestJS ---
   deliverly-back:
     build:
-      context: ./deliverly-back
+      context: ./apps/deliverly-back
       dockerfile: Dockerfile
     container_name: deliverly_backend
     restart: always
@@ -103,11 +103,14 @@ services:
       - kafka
     networks:
       - deliverly_network
+    volumes:
+      - ./apps/deliverly-back:/app
+      - /app/node_modules
 
   # --- Deliverly Frontend: React + Vite ---
   deliverly-front:
     build:
-      context: ./deliverly-front
+      context: ./apps/deliverly-front
       dockerfile: Dockerfile
     container_name: deliverly_frontend
     restart: always
@@ -119,6 +122,9 @@ services:
       - deliverly-back
     networks:
       - deliverly_network
+    volumes:
+      - ./apps/deliverly-front:/app
+      - /app/node_modules
 
 networks:
   deliverly_network:

@@ -1,12 +1,21 @@
 {
-  "name": "@org/source",
+  "name": "@deliverly",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "infra:up": "docker-compose up -d",
+    "infra:down": "docker-compose down",
+    "dev:all": "docker-compose up --build",
+    "dev:back": "docker-compose up --build deliverly-back",
+    "dev:front": "docker-compose up --build deliverly-front",
+    "logs": "docker-compose logs -f"
+  },
   "private": true,
-  "dependencies": {},
   "devDependencies": {
-    "@nx/js": "22.5.4",
+    "@nx/eslint": "^22.5.4",
+    "@nx/js": "^22.5.4",
+    "@nx/vite": "^22.5.4",
+    "@nx/workspace": "^22.5.4",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.5",
     "@swc/helpers": "~0.5.18",
