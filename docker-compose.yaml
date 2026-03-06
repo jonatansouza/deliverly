@@ -1,0 +1,131 @@
+version: "3.8"
+
+services:
+  # --- CouchDB: Database para o Ticket Service (Node.js) ---
+  couchdb:
+    image: couchdb:latest
+    container_name: deliverly_couchdb
+    restart: always
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+    ports:
+      - "5984:5984"
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+    networks:
+      - deliverly_network
+
+  # --- PostgreSQL: Database para o Pricing Engine (C#) ---
+  postgres:
+    image: postgres:latest
+    container_name: deliverly_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=deliverly
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - deliverly_network
+
+  # --- Redis Stack: Cache de alta performance ---
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: deliverly_redis
+    environment:
+      - REDIS_ARGS=--appendonly yes
+    ports:
+      - "6379:6379"
+      - "8001:8001" # Redis Insight (GUI)
+    volumes:
+      - redis_data:/data
+    networks:
+      - deliverly_network
+
+  # --- Kafka (KRaft): O sistema nervoso central ---
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: deliverly_kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+      KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - deliverly_network
+
+  # -- kafka-ui: Interface gráfica para monitoramento do Kafka ---
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: deliverly_kafka_ui
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    networks:
+      - deliverly_network
+
+  # --- Deliverly Backend: NestJS ---
+  deliverly-back:
+    build:
+      context: ./deliverly-back
+      dockerfile: Dockerfile
+    container_name: deliverly_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - COUCHDB_URL=http://admin:password@couchdb:5984
+      - REDIS_HOST=redis-stack
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      - couchdb
+      - redis-stack
+      - kafka
+    networks:
+      - deliverly_network
+
+  # --- Deliverly Frontend: React + Vite ---
+  deliverly-front:
+    build:
+      context: ./deliverly-front
+      dockerfile: Dockerfile
+    container_name: deliverly_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - deliverly-back
+    networks:
+      - deliverly_network
+
+networks:
+  deliverly_network:
+    driver: bridge
+
+volumes:
+  couchdb_data:
+  postgres_data:
+  redis_data:
+  kafka_data:
