@@ -1,0 +1,6 @@
+@DeliverlyCore_HostAddress = http://localhost:5062
+
+GET {{DeliverlyCore_HostAddress}}/pricing/
+Accept: application/json
+
+###
