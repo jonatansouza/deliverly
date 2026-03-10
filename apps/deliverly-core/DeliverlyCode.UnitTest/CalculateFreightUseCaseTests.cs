@@ -1,5 +1,5 @@
 using DeliverlyCore.Pricing.Domain.Entities;
-using DeliverlyCore.Pricing.Domain.ObjectValue;
+using DeliverlyCore.Pricing.Domain.ValueObjects;
 using DeliverlyCore.Pricing.Domain.Ports;
 using DeliverlyCore.Pricing.Domain.UseCases.CalculateFreight;
 using DeliverlyCore.Shared.Domain;

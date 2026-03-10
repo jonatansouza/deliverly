@@ -1,6 +1,6 @@
 using DeliverlyCore.Shared.Domain;
 
-namespace DeliverlyCore.Pricing.Domain.ObjectValue
+namespace DeliverlyCore.Pricing.Domain.ValueObjects
 {
     public sealed class Weight : ValueObject<Weight>
     {

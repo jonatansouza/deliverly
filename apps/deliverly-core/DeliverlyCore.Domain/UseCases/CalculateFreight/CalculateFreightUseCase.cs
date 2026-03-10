@@ -1,4 +1,4 @@
-using DeliverlyCore.Pricing.Domain.ObjectValue;
+using DeliverlyCore.Pricing.Domain.ValueObjects;
 using DeliverlyCore.Pricing.Domain.Ports;
 using DeliverlyCore.Shared.Domain;
 

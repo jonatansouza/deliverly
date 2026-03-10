@@ -1,5 +1,5 @@
 using DeliverlyCore.Pricing.Domain.Entities;
-using DeliverlyCore.Pricing.Domain.ObjectValue;
+using DeliverlyCore.Pricing.Domain.ValueObjects;
 
 namespace DeliverlyCode.UnitTest
 {

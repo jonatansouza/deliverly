@@ -1,7 +1,7 @@
 using DeliverlyCore.Shared.Domain;
 using System.Globalization;
 
-namespace DeliverlyCore.Pricing.Domain.ObjectValue
+namespace DeliverlyCore.Pricing.Domain.ValueObjects
 {
     public sealed class Money : ValueObject<Money>
     {

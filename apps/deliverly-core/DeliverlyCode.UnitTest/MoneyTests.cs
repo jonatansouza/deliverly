@@ -1,4 +1,4 @@
-using DeliverlyCore.Pricing.Domain.ObjectValue;
+using DeliverlyCore.Pricing.Domain.ValueObjects;
 using System.Globalization;
 
 namespace DeliverlyCode.UnitTest
