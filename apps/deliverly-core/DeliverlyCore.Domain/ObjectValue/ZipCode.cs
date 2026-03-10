@@ -56,6 +56,13 @@ namespace DeliverlyCore.Pricing.Domain.ObjectValue
         // task [Comparison]: same macro-region (same first digit)
         public bool IsSameRegion(ZipCode other) => GetRegion() == other.GetRegion();
 
+        // task [GetAllPrefixes]: returns all string prefixes from length 1 to 8
+        public IEnumerable<string> GetAllPrefixes()
+        {
+            for (var i = 1; i <= Value.Length; i++)
+                yield return Value[..i];
+        }
+
         public override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
