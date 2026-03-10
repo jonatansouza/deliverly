@@ -17,6 +17,12 @@ namespace DeliverlyCode.UnitTest
 
         public FakeTariffRepository(IReadOnlyList<TariffTable> result) => _result = result;
 
+        public Task<TariffTable?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<TariffTable?>(null);
+        public Task<IReadOnlyList<TariffTable>> GetAllAsync(CancellationToken ct = default) => Task.FromResult(_result);
+        public Task AddAsync(TariffTable tariff, CancellationToken ct = default) => Task.CompletedTask;
+        public Task UpdateAsync(TariffTable tariff, CancellationToken ct = default) => Task.CompletedTask;
+        public Task DeleteAsync(Guid id, CancellationToken ct = default) => Task.CompletedTask;
+
         public Task<IReadOnlyList<TariffTable>> FindPossibleMatchesAsync(
             IEnumerable<string> originPrefixes,
             IEnumerable<string> destPrefixes,

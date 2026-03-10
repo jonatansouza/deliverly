@@ -37,6 +37,28 @@ namespace DeliverlyCore.Pricing.Domain.Entities
             BaseValue = baseValue;
         }
 
+        // Rebuilds an existing aggregate with a known Id (used by update operations)
+        public static Result<TariffTable> Reconstitute(
+            Guid id,
+            string description,
+            ZipCode originPrefix,
+            ZipCode destinationPrefix,
+            Weight minWeight,
+            Weight maxWeight,
+            Money baseValue)
+        {
+            if (minWeight.Value >= maxWeight.Value)
+                return Result<TariffTable>.Failure("MinWeight must be strictly less than MaxWeight.");
+
+            return Result<TariffTable>.Success(new TariffTable(
+                description,
+                originPrefix,
+                destinationPrefix,
+                minWeight,
+                maxWeight,
+                baseValue) { Id = id });
+        }
+
         // task [Validation]: ZipCode VO ensures no hyphens/spaces in prefixes;
         //                    MinWeight must be strictly less than MaxWeight
         public static Result<TariffTable> Create(

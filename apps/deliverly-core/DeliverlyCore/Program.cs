@@ -12,10 +12,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
-builder.Services.AddInfrastructure(
-    Environment.GetEnvironmentVariable("DB_CONNECTION")
-    ?? throw new InvalidOperationException("DB_CONNECTION environment variable is not set."));
-builder.Services.AddHostedService<KafkaConsumerWorker>();
+
+builder.Services.AddInfrastructure();
+//builder.Services.AddHostedService<KafkaConsumerWorker>();
 
 var app = builder.Build();
 
