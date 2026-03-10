@@ -92,5 +92,79 @@ namespace DeliverlyCode.UnitTest
 
             Assert.That(a, Is.Not.EqualTo(b));
         }
+
+        // business rule [Immutability]
+        [Test]
+        public void ZipCode_Value_ShouldHaveNoPublicSetter()
+        {
+            var property = typeof(ZipCode).GetProperty(nameof(ZipCode.Value));
+
+            Assert.That(property!.CanWrite, Is.False);
+        }
+
+        // task [GetRegion]
+        [Test]
+        public void GetRegion_ShouldReturnFirstDigit()
+        {
+            var zipCode = ZipCode.Create("04145000").Value;
+
+            Assert.That(zipCode.GetRegion(), Is.EqualTo("0"));
+        }
+
+        // task [GetSubRegion]
+        [Test]
+        public void GetSubRegion_ShouldReturnFirstTwoDigits()
+        {
+            var zipCode = ZipCode.Create("04145000").Value;
+
+            Assert.That(zipCode.GetSubRegion(), Is.EqualTo("04"));
+        }
+
+        // task [GetSector]
+        [Test]
+        public void GetSector_ShouldReturnFirstFiveDigits()
+        {
+            var zipCode = ZipCode.Create("04145000").Value;
+
+            Assert.That(zipCode.GetSector(), Is.EqualTo("04145"));
+        }
+
+        // task [Comparison] IsSameSector
+        [Test]
+        public void IsSameSector_WithSameSector_ShouldReturnTrue()
+        {
+            var a = ZipCode.Create("04145000").Value;
+            var b = ZipCode.Create("04145999").Value;
+
+            Assert.That(a.IsSameSector(b), Is.True);
+        }
+
+        [Test]
+        public void IsSameSector_WithDifferentSector_ShouldReturnFalse()
+        {
+            var a = ZipCode.Create("04145000").Value;
+            var b = ZipCode.Create("04146000").Value;
+
+            Assert.That(a.IsSameSector(b), Is.False);
+        }
+
+        // task [Comparison] IsSameRegion
+        [Test]
+        public void IsSameRegion_WithSameRegion_ShouldReturnTrue()
+        {
+            var a = ZipCode.Create("04145000").Value;
+            var b = ZipCode.Create("01310100").Value;
+
+            Assert.That(a.IsSameRegion(b), Is.True);
+        }
+
+        [Test]
+        public void IsSameRegion_WithDifferentRegion_ShouldReturnFalse()
+        {
+            var a = ZipCode.Create("04145000").Value;
+            var b = ZipCode.Create("30130010").Value;
+
+            Assert.That(a.IsSameRegion(b), Is.False);
+        }
     }
 }

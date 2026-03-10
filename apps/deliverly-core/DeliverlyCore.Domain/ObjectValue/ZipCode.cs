@@ -41,6 +41,21 @@ namespace DeliverlyCore.Pricing.Domain.ObjectValue
         // task [Formatting]: returns pattern 00000-000
         public string ToFormattedString() => $"{Value[..5]}-{Value[5..]}";
 
+        // task [GetRegion]: returns the first digit
+        public string GetRegion() => Value[..1];
+
+        // task [GetSubRegion]: returns the first two digits
+        public string GetSubRegion() => Value[..2];
+
+        // task [GetSector]: returns the first five digits
+        public string GetSector() => Value[..5];
+
+        // task [Comparison]: same micro-zone (same first 5 digits)
+        public bool IsSameSector(ZipCode other) => GetSector() == other.GetSector();
+
+        // task [Comparison]: same macro-region (same first digit)
+        public bool IsSameRegion(ZipCode other) => GetRegion() == other.GetRegion();
+
         public override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
