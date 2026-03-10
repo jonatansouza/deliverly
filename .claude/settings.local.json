@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:\\\\Users\\\\Jonatan Gall\\\\projects\\\\deliverly\\\\apps\\\\deliverly-core\" && dotnet test DeliverlyCode.UnitTest/DeliverlyCode.UnitTest.csproj --no-restore 2>&1 || dotnet test DeliverlyCode.UnitTest/DeliverlyCode.UnitTest.csproj 2>&1)"
+    ]
+  }
+}
