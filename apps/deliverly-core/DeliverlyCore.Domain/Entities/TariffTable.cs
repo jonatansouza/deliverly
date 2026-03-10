@@ -7,23 +7,23 @@ namespace DeliverlyCore.Pricing.Domain.Entities
     {
         public string Description { get; private init; }
 
-        // business rule [Data Integrity]: only digits, 1–5 chars
-        public string OriginPrefix { get; private init; }
-        public string DestinationPrefix { get; private init; }
+        // business rule [Data Integrity]: prefix integrity delegated to ZipCode VO
+        public ZipCode OriginPrefix { get; private init; }
+        public ZipCode DestinationPrefix { get; private init; }
 
         // business rule [Weight Brackets]: cargo weight must fall within this range
-        public decimal MinWeight { get; private init; }
-        public decimal MaxWeight { get; private init; }
+        public Weight MinWeight { get; private init; }
+        public Weight MaxWeight { get; private init; }
 
         // business rule [Currency Consistency]: financial value via Money VO
         public Money BaseValue { get; private init; }
 
         private TariffTable(
             string description,
-            string originPrefix,
-            string destinationPrefix,
-            decimal minWeight,
-            decimal maxWeight,
+            ZipCode originPrefix,
+            ZipCode destinationPrefix,
+            Weight minWeight,
+            Weight maxWeight,
             Money baseValue)
         {
             Description = description;
@@ -34,25 +34,18 @@ namespace DeliverlyCore.Pricing.Domain.Entities
             BaseValue = baseValue;
         }
 
-        // task [Validation]: prefixes must contain only digits (no hyphens or spaces), length 1–5
+        // task [Validation]: ZipCode VO ensures no hyphens/spaces in prefixes;
+        //                    MinWeight must be strictly less than MaxWeight
         public static Result<TariffTable> Create(
             string description,
-            string originPrefix,
-            string destinationPrefix,
-            decimal minWeight,
-            decimal maxWeight,
+            ZipCode originPrefix,
+            ZipCode destinationPrefix,
+            Weight minWeight,
+            Weight maxWeight,
             Money baseValue)
         {
-            var originError = ValidatePrefix(originPrefix, nameof(originPrefix));
-            if (originError is not null)
-                return Result<TariffTable>.Failure(originError);
-
-            var destinationError = ValidatePrefix(destinationPrefix, nameof(destinationPrefix));
-            if (destinationError is not null)
-                return Result<TariffTable>.Failure(destinationError);
-
-            if (maxWeight <= minWeight)
-                return Result<TariffTable>.Failure("MaxWeight must be greater than MinWeight.");
+            if (minWeight.Value >= maxWeight.Value)
+                return Result<TariffTable>.Failure("MinWeight must be strictly less than MaxWeight.");
 
             return Result<TariffTable>.Success(new TariffTable(
                 description,
@@ -63,28 +56,14 @@ namespace DeliverlyCore.Pricing.Domain.Entities
                 baseValue));
         }
 
-        private static string? ValidatePrefix(string prefix, string paramName)
-        {
-            if (string.IsNullOrEmpty(prefix))
-                return $"{paramName} must not be empty.";
-
-            if (prefix.Length > 5)
-                return $"{paramName} must be at most 5 digits.";
-
-            if (!prefix.All(char.IsDigit))
-                return $"{paramName} must contain only digits (no hyphens or spaces).";
-
-            return null;
-        }
-
-        // task [Eligibility]: checks zip prefix match and weight within range
-        public bool IsMatch(string originZip, string destinationZip, decimal weight) =>
-            originZip.StartsWith(OriginPrefix)
-            && destinationZip.StartsWith(DestinationPrefix)
-            && weight >= MinWeight
-            && weight <= MaxWeight;
+        // task [Eligibility]: checks ZipCode prefix match and Weight within range
+        public bool IsMatch(ZipCode originZip, ZipCode destinationZip, Weight weight) =>
+            originZip.Value.StartsWith(OriginPrefix.Value)
+            && destinationZip.Value.StartsWith(DestinationPrefix.Value)
+            && weight.Value >= MinWeight.Value
+            && weight.Value <= MaxWeight.Value;
 
         // task [SpecificityScore]: combined prefix length used to rank rules (Longest Prefix Match)
-        public int SpecificityScore => OriginPrefix.Length + DestinationPrefix.Length;
+        public int SpecificityScore => OriginPrefix.Value.Length + DestinationPrefix.Value.Length;
     }
 }

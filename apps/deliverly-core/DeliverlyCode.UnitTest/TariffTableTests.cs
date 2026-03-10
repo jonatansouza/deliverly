@@ -7,100 +7,62 @@ namespace DeliverlyCode.UnitTest
     public class TariffTableTests
     {
         private static Money DefaultBaseValue() => Money.Create(50m, "BRL").Value;
+        private static ZipCode Zip(string raw) => ZipCode.Create(raw).Value;
+        private static Weight Kg(decimal v) => Weight.Create(v).Value;
 
         private static TariffTable CreateValid(
-            string originPrefix = "01",
-            string destinationPrefix = "02",
-            decimal minWeight = 0m,
-            decimal maxWeight = 100m) =>
-            TariffTable.Create("Test Rule", originPrefix, destinationPrefix, minWeight, maxWeight, DefaultBaseValue()).Value;
+            string originPrefix = "01310100",
+            string destinationPrefix = "02010000",
+            decimal minKg = 1m,
+            decimal maxKg = 100m) =>
+            TariffTable.Create(
+                "Test Rule",
+                Zip(originPrefix),
+                Zip(destinationPrefix),
+                Kg(minKg),
+                Kg(maxKg),
+                DefaultBaseValue()).Value;
 
         // task [Validation] -------------------------------------------------------
 
         [Test]
-        public void Create_WithValidPrefixes_ShouldSucceed()
+        public void Create_WithValidInputs_ShouldSucceed()
         {
-            var result = TariffTable.Create("Rule", "011", "021", 0m, 50m, DefaultBaseValue());
+            var result = TariffTable.Create("Rule", Zip("01310100"), Zip("02010000"), Kg(1m), Kg(50m), DefaultBaseValue());
 
             Assert.That(result.IsSuccess, Is.True);
         }
 
         [Test]
-        public void Create_WithOriginPrefixContainingHyphen_ShouldReturnFailure()
+        public void Create_WithMinWeightEqualToMaxWeight_ShouldReturnFailure()
         {
-            var result = TariffTable.Create("Rule", "01-1", "021", 0m, 50m, DefaultBaseValue());
+            var result = TariffTable.Create("Rule", Zip("01310100"), Zip("02010000"), Kg(50m), Kg(50m), DefaultBaseValue());
 
             Assert.That(result.IsFailure, Is.True);
         }
 
         [Test]
-        public void Create_WithDestinationPrefixContainingHyphen_ShouldReturnFailure()
+        public void Create_WithMinWeightGreaterThanMaxWeight_ShouldReturnFailure()
         {
-            var result = TariffTable.Create("Rule", "011", "02-1", 0m, 50m, DefaultBaseValue());
+            var result = TariffTable.Create("Rule", Zip("01310100"), Zip("02010000"), Kg(100m), Kg(10m), DefaultBaseValue());
 
             Assert.That(result.IsFailure, Is.True);
         }
 
         [Test]
-        public void Create_WithOriginPrefixContainingSpace_ShouldReturnFailure()
+        public void Create_WithOriginPrefixContainingHyphen_ShouldReturnFailureFromZipCode()
         {
-            var result = TariffTable.Create("Rule", "01 1", "021", 0m, 50m, DefaultBaseValue());
+            var result = ZipCode.Create("0131-0100");
 
-            Assert.That(result.IsFailure, Is.True);
-        }
-
-        [Test]
-        public void Create_WithDestinationPrefixContainingSpace_ShouldReturnFailure()
-        {
-            var result = TariffTable.Create("Rule", "011", "02 1", 0m, 50m, DefaultBaseValue());
-
-            Assert.That(result.IsFailure, Is.True);
-        }
-
-        [Test]
-        public void Create_WithEmptyOriginPrefix_ShouldReturnFailure()
-        {
-            var result = TariffTable.Create("Rule", string.Empty, "021", 0m, 50m, DefaultBaseValue());
-
-            Assert.That(result.IsFailure, Is.True);
-        }
-
-        [Test]
-        public void Create_WithEmptyDestinationPrefix_ShouldReturnFailure()
-        {
-            var result = TariffTable.Create("Rule", "011", string.Empty, 0m, 50m, DefaultBaseValue());
-
-            Assert.That(result.IsFailure, Is.True);
-        }
-
-        [Test]
-        public void Create_WithOriginPrefixExceedingFiveDigits_ShouldReturnFailure()
-        {
-            var result = TariffTable.Create("Rule", "012345", "021", 0m, 50m, DefaultBaseValue());
-
-            Assert.That(result.IsFailure, Is.True);
-        }
-
-        [Test]
-        public void Create_WithMaxLengthPrefixes_ShouldSucceed()
-        {
-            var result = TariffTable.Create("Rule", "01234", "56789", 0m, 50m, DefaultBaseValue());
-
+            // ZipCode VO strips hyphens and validates 8 numeric digits
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value.Value, Is.EqualTo("01310100"));
         }
 
         [Test]
-        public void Create_WithSingleDigitPrefixes_ShouldSucceed()
+        public void Create_WithOriginPrefixContainingLetters_ShouldFailAtZipCodeLevel()
         {
-            var result = TariffTable.Create("Rule", "0", "1", 0m, 50m, DefaultBaseValue());
-
-            Assert.That(result.IsSuccess, Is.True);
-        }
-
-        [Test]
-        public void Create_WithMaxWeightNotGreaterThanMinWeight_ShouldReturnFailure()
-        {
-            var result = TariffTable.Create("Rule", "01", "02", 50m, 50m, DefaultBaseValue());
+            var result = ZipCode.Create("0131ABCD");
 
             Assert.That(result.IsFailure, Is.True);
         }
@@ -108,19 +70,45 @@ namespace DeliverlyCode.UnitTest
         // business rule [Data Integrity] ------------------------------------------
 
         [Test]
-        public void OriginPrefix_ShouldContainOnlyDigits()
+        public void OriginPrefix_ShouldBeZipCodeValueObject()
         {
-            var tariff = CreateValid(originPrefix: "01234");
+            var property = typeof(TariffTable).GetProperty(nameof(TariffTable.OriginPrefix));
 
-            Assert.That(tariff.OriginPrefix.All(char.IsDigit), Is.True);
+            Assert.That(property!.PropertyType, Is.EqualTo(typeof(ZipCode)));
         }
 
         [Test]
-        public void DestinationPrefix_ShouldContainOnlyDigits()
+        public void DestinationPrefix_ShouldBeZipCodeValueObject()
         {
-            var tariff = CreateValid(destinationPrefix: "56789");
+            var property = typeof(TariffTable).GetProperty(nameof(TariffTable.DestinationPrefix));
 
-            Assert.That(tariff.DestinationPrefix.All(char.IsDigit), Is.True);
+            Assert.That(property!.PropertyType, Is.EqualTo(typeof(ZipCode)));
+        }
+
+        [Test]
+        public void OriginPrefix_ShouldContainOnlyDigits()
+        {
+            var tariff = CreateValid();
+
+            Assert.That(tariff.OriginPrefix.Value.All(char.IsDigit), Is.True);
+        }
+
+        // business rule [Weight Brackets] -----------------------------------------
+
+        [Test]
+        public void MinWeight_ShouldBeWeightValueObject()
+        {
+            var property = typeof(TariffTable).GetProperty(nameof(TariffTable.MinWeight));
+
+            Assert.That(property!.PropertyType, Is.EqualTo(typeof(Weight)));
+        }
+
+        [Test]
+        public void MaxWeight_ShouldBeWeightValueObject()
+        {
+            var property = typeof(TariffTable).GetProperty(nameof(TariffTable.MaxWeight));
+
+            Assert.That(property!.PropertyType, Is.EqualTo(typeof(Weight)));
         }
 
         // business rule [Currency Consistency] ------------------------------------
@@ -138,87 +126,78 @@ namespace DeliverlyCode.UnitTest
         [Test]
         public void IsMatch_WhenZipsAndWeightMatch_ShouldReturnTrue()
         {
-            var tariff = CreateValid(originPrefix: "01", destinationPrefix: "02", minWeight: 0m, maxWeight: 100m);
+            var tariff = CreateValid(originPrefix: "01310100", destinationPrefix: "02010000", minKg: 1m, maxKg: 100m);
 
-            Assert.That(tariff.IsMatch("01310-100", "02010-000", 50m), Is.True);
+            Assert.That(tariff.IsMatch(Zip("01310100"), Zip("02010000"), Kg(50m)), Is.True);
         }
 
         [Test]
         public void IsMatch_WhenOriginZipDoesNotStartWithPrefix_ShouldReturnFalse()
         {
-            var tariff = CreateValid(originPrefix: "01");
+            var tariff = CreateValid(originPrefix: "01310100");
 
-            Assert.That(tariff.IsMatch("99999-000", "02010-000", 50m), Is.False);
+            Assert.That(tariff.IsMatch(Zip("99999000"), Zip("02010000"), Kg(50m)), Is.False);
         }
 
         [Test]
         public void IsMatch_WhenDestinationZipDoesNotStartWithPrefix_ShouldReturnFalse()
         {
-            var tariff = CreateValid(destinationPrefix: "02");
+            var tariff = CreateValid(destinationPrefix: "02010000");
 
-            Assert.That(tariff.IsMatch("01310-100", "99999-000", 50m), Is.False);
+            Assert.That(tariff.IsMatch(Zip("01310100"), Zip("99999000"), Kg(50m)), Is.False);
         }
 
         [Test]
         public void IsMatch_WhenWeightIsBelowMinWeight_ShouldReturnFalse()
         {
-            var tariff = CreateValid(minWeight: 10m, maxWeight: 100m);
+            var tariff = CreateValid(minKg: 10m, maxKg: 100m);
 
-            Assert.That(tariff.IsMatch("01310-100", "02010-000", 5m), Is.False);
+            Assert.That(tariff.IsMatch(Zip("01310100"), Zip("02010000"), Kg(5m)), Is.False);
         }
 
         [Test]
         public void IsMatch_WhenWeightIsAboveMaxWeight_ShouldReturnFalse()
         {
-            var tariff = CreateValid(minWeight: 0m, maxWeight: 100m);
+            var tariff = CreateValid(minKg: 1m, maxKg: 50m);
 
-            Assert.That(tariff.IsMatch("01310-100", "02010-000", 150m), Is.False);
+            Assert.That(tariff.IsMatch(Zip("01310100"), Zip("02010000"), Kg(100m)), Is.False);
         }
 
-        // business rule [Weight Brackets]: boundary values are inclusive
         [Test]
         public void IsMatch_WhenWeightEqualsMinWeight_ShouldReturnTrue()
         {
-            var tariff = CreateValid(minWeight: 10m, maxWeight: 100m);
+            var tariff = CreateValid(minKg: 10m, maxKg: 100m);
 
-            Assert.That(tariff.IsMatch("01310-100", "02010-000", 10m), Is.True);
+            Assert.That(tariff.IsMatch(Zip("01310100"), Zip("02010000"), Kg(10m)), Is.True);
         }
 
         [Test]
         public void IsMatch_WhenWeightEqualsMaxWeight_ShouldReturnTrue()
         {
-            var tariff = CreateValid(minWeight: 0m, maxWeight: 100m);
+            var tariff = CreateValid(minKg: 1m, maxKg: 100m);
 
-            Assert.That(tariff.IsMatch("01310-100", "02010-000", 100m), Is.True);
+            Assert.That(tariff.IsMatch(Zip("01310100"), Zip("02010000"), Kg(100m)), Is.True);
         }
 
         // task [SpecificityScore] -------------------------------------------------
 
         [Test]
-        public void SpecificityScore_ShouldReturnCombinedPrefixLength()
+        public void SpecificityScore_ShouldReturnCombinedPrefixValueLength()
         {
-            var tariff = CreateValid(originPrefix: "011", destinationPrefix: "02");
+            var tariff = CreateValid(originPrefix: "01310100", destinationPrefix: "02010000");
 
-            Assert.That(tariff.SpecificityScore, Is.EqualTo(5));
-        }
-
-        [Test]
-        public void SpecificityScore_WithMaxLengthPrefixes_ShouldReturnTen()
-        {
-            var tariff = CreateValid(originPrefix: "01234", destinationPrefix: "56789");
-
-            Assert.That(tariff.SpecificityScore, Is.EqualTo(10));
+            Assert.That(tariff.SpecificityScore, Is.EqualTo(16));
         }
 
         // business rule [Longest Prefix Match] ------------------------------------
 
         [Test]
-        public void SpecificityScore_MoreSpecificRule_ShouldOutrankBroaderRule()
+        public void SpecificityScore_ShouldEqualSumOfOriginAndDestinationPrefixLengths()
         {
-            var broadRule = CreateValid(originPrefix: "0", destinationPrefix: "0");
-            var specificRule = CreateValid(originPrefix: "011", destinationPrefix: "021");
+            var tariff = CreateValid();
 
-            Assert.That(specificRule.SpecificityScore, Is.GreaterThan(broadRule.SpecificityScore));
+            Assert.That(tariff.SpecificityScore,
+                Is.EqualTo(tariff.OriginPrefix.Value.Length + tariff.DestinationPrefix.Value.Length));
         }
     }
 }
