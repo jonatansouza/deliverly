@@ -6,6 +6,7 @@ namespace DeliverlyCore.Pricing.Domain.ValueObjects
     public sealed class ZipCode : ValueObject<ZipCode>
     {
         private static readonly Regex DigitsOnly = new(@"^\d{8}$", RegexOptions.Compiled);
+        private static readonly Regex PrefixDigits = new(@"^\d{1,7}$", RegexOptions.Compiled);
 
         public string Value { get; }
 
@@ -21,6 +22,20 @@ namespace DeliverlyCore.Pricing.Domain.ValueObjects
             if (result.IsFailure) return result;
 
             var digits = rawZipCode.Replace("-", string.Empty);
+            return Result<ZipCode>.Success(new ZipCode(digits));
+        }
+
+        // task [CreateAsPrefix]: accepts 1–7 digits, stores as-is (no padding)
+        public static Result<ZipCode> CreateAsPrefix(string rawPrefix)
+        {
+            if (string.IsNullOrEmpty(rawPrefix))
+                return Result<ZipCode>.Failure("ZipCode prefix cannot be empty or null.");
+
+            var digits = rawPrefix.Replace("-", string.Empty);
+
+            if (!PrefixDigits.IsMatch(digits))
+                return Result<ZipCode>.Failure("ZipCode prefix must contain between 1 and 7 numeric digits.");
+
             return Result<ZipCode>.Success(new ZipCode(digits));
         }
 

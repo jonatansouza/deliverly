@@ -8,7 +8,7 @@ namespace DeliverlyCore.Infra.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<TariffTable> builder)
         {
-            builder.ToTable("tariff_tables");
+            builder.ToTable("tariff");
 
             builder.HasKey(t => t.Id);
             builder.Property(t => t.Id)

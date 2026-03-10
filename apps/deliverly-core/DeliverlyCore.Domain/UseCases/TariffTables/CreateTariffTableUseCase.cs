@@ -13,10 +13,10 @@ namespace DeliverlyCore.Pricing.Domain.UseCases.TariffTables
 
         public async Task<Result<TariffTableResponse>> ExecuteAsync(CreateTariffTableRequest input, CancellationToken ct = default)
         {
-            var originResult = ZipCode.Create(input.OriginPrefix);
+            var originResult = ZipCode.CreateAsPrefix(input.OriginPrefix);
             if (originResult.IsFailure) return Result<TariffTableResponse>.Failure(originResult.Error);
 
-            var destResult = ZipCode.Create(input.DestinationPrefix);
+            var destResult = ZipCode.CreateAsPrefix(input.DestinationPrefix);
             if (destResult.IsFailure) return Result<TariffTableResponse>.Failure(destResult.Error);
 
             var minWeightResult = Weight.Create(input.MinWeightKg);

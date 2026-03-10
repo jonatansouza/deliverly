@@ -26,6 +26,12 @@ namespace DeliverlyCore.Infra.Persistence.Repositories
             await _context.SaveChangesAsync(ct);
         }
 
+        public async Task AddRangeAsync(IEnumerable<TariffTable> tariffs, CancellationToken ct = default)
+        {
+            await _context.TariffTables.AddRangeAsync(tariffs, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
         public async Task UpdateAsync(TariffTable tariff, CancellationToken ct = default)
         {
             _context.TariffTables.Update(tariff);

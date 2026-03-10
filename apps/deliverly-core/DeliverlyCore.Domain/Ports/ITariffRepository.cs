@@ -8,6 +8,7 @@ namespace DeliverlyCore.Pricing.Domain.Ports
         Task<TariffTable?> GetByIdAsync(Guid id, CancellationToken ct = default);
         Task<IReadOnlyList<TariffTable>> GetAllAsync(CancellationToken ct = default);
         Task AddAsync(TariffTable tariff, CancellationToken ct = default);
+        Task AddRangeAsync(IEnumerable<TariffTable> tariffs, CancellationToken ct = default);
         Task UpdateAsync(TariffTable tariff, CancellationToken ct = default);
         Task DeleteAsync(Guid id, CancellationToken ct = default);
 

@@ -21,6 +21,7 @@ namespace DeliverlyCore.Infra
             services.AddScoped<ListTariffTablesUseCase>();
             services.AddScoped<UpdateTariffTableUseCase>();
             services.AddScoped<DeleteTariffTableUseCase>();
+            services.AddScoped<CreateTariffTablesBatchUseCase>();
 
             return services;
         }

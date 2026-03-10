@@ -8,6 +8,7 @@ namespace DeliverlyCore.Controllers
     public class TariffTablesController : ControllerBase
     {
         private readonly CreateTariffTableUseCase _create;
+        private readonly CreateTariffTablesBatchUseCase _createBatch;
         private readonly GetTariffTableByIdUseCase _getById;
         private readonly ListTariffTablesUseCase _list;
         private readonly UpdateTariffTableUseCase _update;
@@ -15,12 +16,14 @@ namespace DeliverlyCore.Controllers
 
         public TariffTablesController(
             CreateTariffTableUseCase create,
+            CreateTariffTablesBatchUseCase createBatch,
             GetTariffTableByIdUseCase getById,
             ListTariffTablesUseCase list,
             UpdateTariffTableUseCase update,
             DeleteTariffTableUseCase delete)
         {
             _create = create;
+            _createBatch = createBatch;
             _getById = getById;
             _list = list;
             _update = update;
@@ -48,6 +51,14 @@ namespace DeliverlyCore.Controllers
             var result = await _create.ExecuteAsync(request, ct);
             if (result.IsFailure) return BadRequest(result.Error);
             return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
+        }
+
+        [HttpPost("batch")]
+        public async Task<IActionResult> CreateBatch([FromBody] IEnumerable<CreateTariffTableRequest> requests, CancellationToken ct)
+        {
+            var result = await _createBatch.ExecuteAsync(requests, ct);
+            if (result.IsFailure) return BadRequest(result.Error);
+            return Ok(result.Value);
         }
 
         [HttpPut("{id:guid}")]
