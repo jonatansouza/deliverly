@@ -18,6 +18,9 @@ namespace DeliverlyCore.Pricing.Domain.Entities
         // business rule [Currency Consistency]: financial value via Money VO
         public Money BaseValue { get; private init; }
 
+        // Required by EF Core for materialization
+        protected TariffTable() { }
+
         private TariffTable(
             string description,
             ZipCode originPrefix,

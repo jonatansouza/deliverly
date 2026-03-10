@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="DeliverlyCode.UnitTest/DeliverlyCode.UnitTest.csproj" Id="75dc1b3f-d598-4100-96e8-1c5b6da5fa10" />
   <Project Path="DeliverlyCore.Domain/DeliverlyCore.Pricing.Domain.csproj" Id="7d9b4609-d534-49ee-9afb-a12ffb84c47c" />
+  <Project Path="DeliverlyCore.Infra/DeliverlyCore.Infra.csproj" />
   <Project Path="DeliverlyCore.Shared/DeliverlyCore.Shared.csproj" Id="192b5257-23a5-4b50-9003-335475ced640" />
   <Project Path="DeliverlyCore/DeliverlyCore.csproj" />
 </Solution>
