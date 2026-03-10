@@ -1,6 +1,161 @@
-@DeliverlyCore_HostAddress = http://localhost:5062
+@HostAddress = http://localhost:5062/api/tariff-tables
 
-GET {{DeliverlyCore_HostAddress}}/pricing/
-Accept: application/json
+### ==========================================
+### 1. REGRAS GERAIS (ESTADO -> ESTADO)
+### Essas regras têm prefixos curtos (1 dígito) e servem como "Fallback".
+### SP (0) para RJ (2)
+### ==========================================
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Estado SP para Estado RJ - Leve",
+  "originPrefix": "0",
+  "destinationPrefix": "2",
+  "minWeightKg": 0.3,
+  "maxWeightKg": 5,
+  "baseValueAmount": 35.00,
+  "currency": "BRL"
+}
 
 ###
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Estado SP para Estado RJ - Pesado",
+  "originPrefix": "0",
+  "destinationPrefix": "2",
+  "minWeightKg": 5.01,
+  "maxWeightKg": 30,
+  "baseValueAmount": 80.00,
+  "currency": "BRL"
+}
+
+###
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Estado SP para Estado MG - Padrão",
+  "originPrefix": "0",
+  "destinationPrefix": "3",
+  "minWeightKg": 0.01,
+  "maxWeightKg": 30,
+  "baseValueAmount": 45.00,
+  "currency": "BRL"
+}
+
+
+### ==========================================
+### 2. REGRAS REGIONAIS (CAPITAL -> CAPITAL)
+### Prefixos de 2 dígitos. Mais específicas, devem ganhar das regras de Estado.
+### SP Capital (01 a 05) para RJ Capital (20 a 23)
+### ==========================================
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Capital SP para Capital RJ - Promocional Leve",
+  "originPrefix": "01",
+  "destinationPrefix": "20",
+  "minWeightKg": 0.01,
+  "maxWeightKg": 5,
+  "baseValueAmount": 25.00,
+  "currency": "BRL"
+}
+
+###
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Capital SP para Capital RJ - Promocional Médio",
+  "originPrefix": "01",
+  "destinationPrefix": "20",
+  "minWeightKg": 5.01,
+  "maxWeightKg": 15,
+  "baseValueAmount": 40.00,
+  "currency": "BRL"
+}
+
+
+### ==========================================
+### 3. REGRAS DE MICROZONAS / BAIRROS
+### Prefixos de 3 a 5 dígitos. Maior prioridade no seu sistema.
+### ==========================================
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Vila Mariana (SP) para Copacabana (RJ) - VIP",
+  "originPrefix": "041",
+  "destinationPrefix": "220",
+  "minWeightKg": 0.01,
+  "maxWeightKg": 10,
+  "baseValueAmount": 18.50,
+  "currency": "BRL"
+}
+
+###
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Centro SP para Centro BH - Expresso",
+  "originPrefix": "010",
+  "destinationPrefix": "301",
+  "minWeightKg": 0.01,
+  "maxWeightKg": 5,
+  "baseValueAmount": 22.00,
+  "currency": "BRL"
+}
+
+###
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Rua Específica SP (B2B) para CD Rio - Carga Pesada",
+  "originPrefix": "04145",
+  "destinationPrefix": "25600",
+  "minWeightKg": 30.01,
+  "maxWeightKg": 1000,
+  "baseValueAmount": 250.00,
+  "currency": "BRL"
+}
+
+### ==========================================
+### 4. REGRAS LOCAIS (INTRA-ESTADUAL)
+### ==========================================
+
+POST {{HostAddress}}
+Accept: */*
+Content-Type: application/json
+
+{
+  "description": "Capital SP para Interior SP (Campinas)",
+  "originPrefix": "01",
+  "destinationPrefix": "13",
+  "minWeightKg": 0.01,
+  "maxWeightKg": 20,
+  "baseValueAmount": 15.00,
+  "currency": "BRL"
+
+}
