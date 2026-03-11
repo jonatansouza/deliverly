@@ -3,7 +3,7 @@ import { TicketDTO } from 'src/application/dtos/ticket.dto';
 import { TicketService } from 'src/application/services/ticket.service';
 import { TicketRequestDTO } from '../../application/dtos/ticket-request.dto';
 
-@Controller('ticket')
+@Controller('tickets')
 export class TicketController {
   constructor(public readonly service: TicketService) {}
 
