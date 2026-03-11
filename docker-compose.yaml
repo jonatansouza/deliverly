@@ -124,6 +124,7 @@ services:
     volumes:
       - ./apps/deliverly-front:/app
       - /app/node_modules
+
   # --- Deliverly Core: C# .NET 9 ---
   # deliverly-core:
   #   build:
@@ -147,6 +148,22 @@ services:
   #   networks:
   #     - deliverly_network
 
+  # --- Rancher: Plataforma de Gerenciamento Kubernetes ---
+  rancher:
+    image: rancher/rancher:latest
+    container_name: deliverly_rancher
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - CATTLE_BOOTSTRAP_PASSWORD=password
+      - CATTLE_PASSWORD_MIN_LENGTH=6
+    ports:
+      - "8002:80"
+      - "8443:443"
+    volumes:
+      - rancher_data:/var/lib/rancher
+    networks:
+      - deliverly_network
 networks:
   deliverly_network:
     driver: bridge
@@ -156,3 +173,4 @@ volumes:
   postgres_data:
   redis_data:
   kafka_data:
+  rancher_data:
