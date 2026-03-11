@@ -12,7 +12,8 @@
     "logs": "docker-compose logs -f",
     "deploy:front": "powershell -File ./deploy.ps1 -App deliverly-front",
     "deploy:back": "powershell -File ./deploy.ps1 -App deliverly-back",
-    "deploy:core": "powershell -File ./deploy.ps1 -App deliverly-core"
+    "deploy:core": "powershell -File ./deploy.ps1 -App deliverly-core",
+    "deploy": "npm run deploy:front && npm run deploy:back && npm run deploy:core"
   },
   "private": true,
   "devDependencies": {

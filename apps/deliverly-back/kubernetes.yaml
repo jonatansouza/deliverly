@@ -1,0 +1,108 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: deliverly
+  labels:
+    name: deliverly
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deliverly-back
+  namespace: deliverly
+  labels:
+    app: deliverly-back
+spec:
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deliverly-back
+  template:
+    metadata:
+      labels:
+        app: deliverly-back
+    spec:
+      hostNetwork: true
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 127.0.0.11
+      containers:
+        - name: deliverly-back
+          image: deliverly-back
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: COUCHDB_URL
+              value: http://admin:password@couchdb:5984
+            - name: COUCHDB_USER
+              value: admin
+            - name: COUCHDB_PASSWORD
+              value: password
+            - name: REDIS_HOST
+              value: redis-stack
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:29092
+            - name: KAFKA_GROUP_ID
+              value: deliverly-group
+          resources:
+            requests:
+              cpu: '200m'
+              memory: '128Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+          stdin: true
+          tty: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 120
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: deliverly-back
+  namespace: deliverly
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: deliverly-back
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 50
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deliverly-back
+  namespace: deliverly
+spec:
+  selector:
+    app: deliverly-back
+  ports:
+    - protocol: TCP
+      port: 3000
+      nodePort: 30300
+  type: NodePort

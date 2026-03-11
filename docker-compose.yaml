@@ -83,6 +83,7 @@ services:
 
   # --- Deliverly Backend: NestJS ---
   deliverly-back:
+    image: deliverly-back
     build:
       context: ./apps/deliverly-back
       dockerfile: Dockerfile
@@ -133,6 +134,14 @@ services:
     profiles:
       - "build-only"
 
+  deliverly-core:
+    image: deliverly-core
+    build:
+      context: ./apps/deliverly-core
+      dockerfile: Dockerfile
+    profiles:
+      - "build-only"
+
   # --- Deliverly Core: C# .NET 9 ---
   # deliverly-core:
   #   build:
@@ -169,6 +178,8 @@ services:
       - "8002:80"
       - "8443:443"
       - "30080:30080"
+      - "30300:30300"
+      - "30800:30800"
     volumes:
       - rancher_data:/var/lib/rancher
     networks:

@@ -43,7 +43,7 @@ spec:
         - name: deliverly-front # Workload
           env:
             - name: VITE_API_URL
-              value: http://localhost:3000
+              value: http://localhost:30300
           image: deliverly-front # Image
           imagePullPolicy: Never
           livenessProbe:

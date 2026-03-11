@@ -1,8 +1,16 @@
+# Stage 1: Build
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Run
 FROM node:20-slim
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+RUN npm ci --omit=dev
+COPY --from=builder /app/dist ./dist
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+CMD ["node", "dist/main"]
