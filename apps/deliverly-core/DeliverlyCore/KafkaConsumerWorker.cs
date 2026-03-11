@@ -23,7 +23,7 @@ namespace DeliverlyCore
 
             _consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
 
-            Topics.Add(config.Get<string>(ConfigurationConstants.KAFKA_TICKET_TOPIC));
+            Topics.Add(config.Get<string>(ConfigurationConstants.KAFKA_TOPIC_TICKET_CREATE));
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

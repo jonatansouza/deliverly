@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 
 builder.Services.AddInfrastructure();
-//builder.Services.AddHostedService<KafkaConsumerWorker>();
+builder.Services.AddHostedService<KafkaConsumerWorker>();
 
 var app = builder.Build();
 

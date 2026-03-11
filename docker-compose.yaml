@@ -95,6 +95,7 @@ services:
       - COUCHDB_URL=http://admin:password@couchdb:5984
       - REDIS_HOST=redis-stack
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_GROUP_ID=deliverly-group
     depends_on:
       - couchdb
       - redis-stack
@@ -124,25 +125,27 @@ services:
       - ./apps/deliverly-front:/app
       - /app/node_modules
   # --- Deliverly Core: C# .NET 9 ---
-  deliverly-core:
-    build:
-      context: ./apps/deliverly-core
-      dockerfile: Dockerfile
-    container_name: deliverly_core
-    restart: always
-    ports:
-      - "5000:8080"
-    environment:
-      - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DOTNET_USE_POLLING_FILE_WATCHER=1
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=deliverly;Username=admin;Password=password
-      - Kafka__BootstrapServers=kafka:29092
-    depends_on:
-      - postgres
-      - kafka
-    networks:
-      - deliverly_network
+  # deliverly-core:
+  #   build:
+  #     context: ./apps/deliverly-core
+  #     dockerfile: Dockerfile
+  #   container_name: deliverly_core
+  #   restart: always
+  #   ports:
+  #     - "5000:8080"
+  #   environment:
+  #     - ASPNETCORE_URLS=http://+:8080
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - DOTNET_USE_POLLING_FILE_WATCHER=1
+  #     - ConnectDB_CONNECTION=Host=localhost;Port=5432;Database=deliverly;Username=admin;Password=password;Database=deliverly;
+  #     - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+  #     - KAFKA_GROUP_ID=deliverly-group
+  #     - KAFKA_TOPIC_TICKET_CREATE=ticket-create
+  #   depends_on:
+  #     - postgres
+  #     - kafka
+  #   networks:
+  #     - deliverly_network
 
 networks:
   deliverly_network:
