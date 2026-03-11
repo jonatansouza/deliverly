@@ -107,23 +107,31 @@ services:
       - /app/node_modules
 
   # --- Deliverly Frontend: React + Vite ---
+  # deliverly-front:
+  #   build:
+  #     context: ./apps/deliverly-front
+  #     dockerfile: Dockerfile
+  #   container_name: deliverly_frontend
+  #   restart: always
+  #   ports:
+  #     - "5173:5173"
+  #   environment:
+  #     - VITE_API_URL=http://localhost:3000
+  #   depends_on:
+  #     - deliverly-back
+  #   networks:
+  #     - deliverly_network
+  #   volumes:
+  #     - ./apps/deliverly-front:/app
+  #     - /app/node_modules
+  # --- Deliverly Frontend: Image Builder ---
   deliverly-front:
+    image: deliverly-front
     build:
       context: ./apps/deliverly-front
       dockerfile: Dockerfile
-    container_name: deliverly_frontend
-    restart: always
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:3000
-    depends_on:
-      - deliverly-back
-    networks:
-      - deliverly_network
-    volumes:
-      - ./apps/deliverly-front:/app
-      - /app/node_modules
+    profiles:
+      - "build-only"
 
   # --- Deliverly Core: C# .NET 9 ---
   # deliverly-core:
@@ -160,6 +168,7 @@ services:
     ports:
       - "8002:80"
       - "8443:443"
+      - "30080:30080"
     volumes:
       - rancher_data:/var/lib/rancher
     networks:
