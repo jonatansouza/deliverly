@@ -20,7 +20,7 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: deliverly-core
@@ -63,7 +63,7 @@ spec:
           stdin: true
           tty: true
       restartPolicy: Always
-      terminationGracePeriodSeconds: 120
+      terminationGracePeriodSeconds: 10
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -75,8 +75,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: deliverly-core
-  minReplicas: 1
-  maxReplicas: 1
+  minReplicas: 2
+  maxReplicas: 5
   metrics:
     - type: Resource
       resource:

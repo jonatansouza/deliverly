@@ -74,7 +74,7 @@ spec:
           stdin: true
           tty: true
       restartPolicy: Always
-      terminationGracePeriodSeconds: 120
+      terminationGracePeriodSeconds: 10
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
