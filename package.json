@@ -10,7 +10,9 @@
     "dev:front": "docker-compose up --build deliverly-front",
     "dev:core": "docker-compose up --build deliverly-core",
     "logs": "docker-compose logs -f",
-    "deploy:front": "./apps/deliverly-front/deploy.ps1"
+    "deploy:front": "powershell -File ./deploy.ps1 -App deliverly-front",
+    "deploy:back": "powershell -File ./deploy.ps1 -App deliverly-back",
+    "deploy:core": "powershell -File ./deploy.ps1 -App deliverly-core"
   },
   "private": true,
   "devDependencies": {
