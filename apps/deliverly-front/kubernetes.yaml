@@ -3,6 +3,8 @@ kind: Namespace
 apiVersion: v1
 metadata:
   name: deliverly # Namespace
+  annotations:
+    field.cattle.io/projectId: local:p-pb8wd
   labels:
     name: deliverly # Namespace
 ---

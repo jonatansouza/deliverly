@@ -12,7 +12,8 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
     networks:
-      - deliverly_network
+      deliverly_network:
+        ipv4_address: 172.25.0.10
 
   # --- PostgreSQL: Database para o Pricing Engine (C#) ---
   postgres:
@@ -28,7 +29,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - deliverly_network
+      deliverly_network:
+        ipv4_address: 172.25.0.11
 
   # --- Redis Stack: Cache de alta performance ---
   redis-stack:
@@ -42,7 +44,8 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - deliverly_network
+      deliverly_network:
+        ipv4_address: 172.25.0.12
 
   # --- Kafka (KRaft): O sistema nervoso central ---
   kafka:
@@ -65,7 +68,8 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
-      - deliverly_network
+      deliverly_network:
+        ipv4_address: 172.25.0.13
 
   # -- kafka-ui: Interface gráfica para monitoramento do Kafka ---
   kafka-ui:
@@ -128,6 +132,9 @@ services:
 networks:
   deliverly_network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
 
 volumes:
   couchdb_data:

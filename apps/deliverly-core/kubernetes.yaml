@@ -3,6 +3,8 @@ kind: Namespace
 apiVersion: v1
 metadata:
   name: deliverly
+  annotations:
+    field.cattle.io/projectId: local:p-pb8wd
   labels:
     name: deliverly
 ---
@@ -29,11 +31,11 @@ spec:
       labels:
         app: deliverly-core
     spec:
-      hostNetwork: true
-      dnsPolicy: None
-      dnsConfig:
-        nameservers:
-          - 127.0.0.11
+      hostAliases:
+        - ip: "172.25.0.11"
+          hostnames: ["postgres"]
+        - ip: "172.25.0.13"
+          hostnames: ["kafka"]
       containers:
         - name: deliverly-core
           image: deliverly-core
