@@ -1,24 +1,24 @@
 using DeliverlyCore;
+using DeliverlyCore.Consumers;
 using DeliverlyCore.Infra;
 using DeliverlyCore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
-
 builder.Services.AddInfrastructure();
+
+// Kafka handlers — add a new line here for each new topic
+builder.Services.AddSingleton<IKafkaMessageHandler, TicketCreateHandler>();
+
 builder.Services.AddHostedService<KafkaConsumerWorker>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

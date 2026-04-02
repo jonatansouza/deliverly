@@ -1,62 +1,66 @@
-﻿using Confluent.Kafka;
+using Confluent.Kafka;
+using DeliverlyCore.Consumers;
 using DeliverlyCore.Services;
 
-namespace DeliverlyCore
+namespace DeliverlyCore;
+
+public class KafkaConsumerWorker : BackgroundService
 {
-    public class KafkaConsumerWorker : BackgroundService
+    private readonly ILogger<KafkaConsumerWorker> _logger;
+    private readonly IConsumer<Ignore, string> _consumer;
+    private readonly IReadOnlyDictionary<string, IKafkaMessageHandler> _handlers;
+
+    public KafkaConsumerWorker(
+        ILogger<KafkaConsumerWorker> logger,
+        IConfigurationService config,
+        IEnumerable<IKafkaMessageHandler> handlers)
     {
-        private readonly ILogger<KafkaConsumerWorker> _logger;
-        private readonly IConsumer<Ignore, string> _consumer;
-        private readonly List<string> Topics = [];
+        _logger = logger;
+        _handlers = handlers.ToDictionary(h => h.Topic);
 
-        public KafkaConsumerWorker(ILogger<KafkaConsumerWorker> logger, IConfigurationService config)
+        var consumerConfig = new ConsumerConfig
         {
-            _logger = logger;
+            BootstrapServers = config.Get<string>(ConfigurationConstants.KAFKA_BOOTSTRAP_SERVERS),
+            GroupId = config.Get<string>(ConfigurationConstants.KAFKA_GROUP_ID),
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = true
+        };
 
-            var consumerConfig = new ConsumerConfig
-            {
-                BootstrapServers = config.Get<string>(ConfigurationConstants.KAFKA_BOOTSTRAP_SERVERS),
-                GroupId = config.Get<string>(ConfigurationConstants.KAFKA_GROUP_ID),
-                AutoOffsetReset = AutoOffsetReset.Earliest,
-                EnableAutoCommit = true
-            };
+        _consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+    }
 
-            _consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        => Task.Run(() => StartConsumerLoop(stoppingToken), stoppingToken);
 
-            Topics.Add(config.Get<string>(ConfigurationConstants.KAFKA_TOPIC_TICKET_CREATE));
-        }
+    private void StartConsumerLoop(CancellationToken stoppingToken)
+    {
+        _consumer.Subscribe(_handlers.Keys);
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-            => Task.Run(() => StartConsumerLoop(stoppingToken), stoppingToken);
-        
-        private void StartConsumerLoop(CancellationToken stoppingToken)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            Topics.ForEach(topic => _consumer.Subscribe(topic));
-           
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    var result = _consumer.Consume(stoppingToken);
+                var result = _consumer.Consume(stoppingToken);
 
-                    _logger.LogInformation("Message received: {Value}", result.Message.Value);
-                }
-                catch (OperationCanceledException)
-                {
-                    // Expected when the application is shutting down
-                    break;
-                }
-                catch (ConsumeException e)
-                {
-                    _logger.LogError($"Kafka consume error: {e.Error.Reason}");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogCritical(ex, "Unexpected error in Kafka loop");
-                }
+                if (_handlers.TryGetValue(result.Topic, out var handler))
+                    handler.HandleAsync(result.Message.Value, stoppingToken).GetAwaiter().GetResult();
+                else
+                    _logger.LogWarning("No handler registered for topic: {Topic}", result.Topic);
             }
-
-            _consumer.Close(); // Ensures offsets are committed and the group is notified
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (ConsumeException e)
+            {
+                _logger.LogError("Kafka consume error: {Reason}", e.Error.Reason);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Unexpected error in Kafka loop");
+            }
         }
+
+        _consumer.Close();
     }
 }

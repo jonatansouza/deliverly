@@ -13,5 +13,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\DeliverlyCore.Infra\DeliverlyCore.Infra.csproj" />
+	  <ProjectReference Include="..\DeliverlyCore.Shared\DeliverlyCore.Shared.csproj" />
 	</ItemGroup>
 </Project>

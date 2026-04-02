@@ -10,7 +10,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DB_CONNECTION": "Host=localhost;Port=5432;Database=deliverly;Username=admin;Password=password;Database=deliverly;",
         "KAFKA_BOOTSTRAP_SERVERS": "localhost:9092",
-        "KAFKA_GROUP_ID": "ticket-service-group",
+        "KAFKA_GROUP_ID": "deliverly-core-group",
         "KAFKA_TOPIC_TICKET_CREATE": "ticket.create"
       }
     }
